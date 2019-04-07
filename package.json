@@ -25,7 +25,9 @@
   },
   "proxy": "http://localhost:8080",
   "nodemonConfig": {
-    "watch": ["server"]
+    "watch": [
+      "server"
+    ]
   },
   "browserslist": [
     ">0.2%",

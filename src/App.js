@@ -5,102 +5,114 @@ import './App.css';
 class App extends Component {
   constructor(props) {
     super(props);
-
-    // properties
     this.state = {
-      smoke: '',
-      users: [],
-      newUser: { username: '' }
+      cards: [
+        { task: 'BUY FOOD', status: 'DONE' },
+        { task: 'CHEF UP YUMMY GRINDS', status: 'DOING' },
+        { task: 'ENJOY THEM TASTY GRINDS', status: 'TO-DO' },
+      ],
+      task: '',
+      status: ''
     };
-
-    // bindings
-    this.smokeTest = this.smokeTest.bind(this);
-    this.getUsers = this.getUsers.bind(this);
-    this.updateUser = this.updateUser.bind(this);
-    this.createUser = this.createUser.bind(this);
-
-    // init
-    this.smokeTest();
-    this.getUsers();
   }
 
-  smokeTest() {
-    fetch('/api/smoke')
-      .then((res) => {
-        return res.json();
+  componentDidMount = e => {
+    console.log("mounted")
+    fetch("/api/cards")
+      .then(response => {
+        return response.json();
       })
-      .then((body) => {
-        this.setState({ smoke: body.smoke });
-      });
+      .then(cardsData => {
+        this.setState({ cards: cardsData })
+        console.log(JSON.stringify(cardsData))
+      })
   }
 
-  getUsers() {
-    fetch('/api/users')
-      .then((res) => { return res.json(); })
-      .then((body) => {
-        this.setState({ users: body });
-      });
-  }
+  handleSubmit = e => {
+    e.preventDefault();
+    const cards = this.state.cards;
+    cards.push({ task: this.state.task, status: this.state.status });
+    this.setState({ cards });
+  };
 
-  updateUser(e) {
-    this.setState({ newUser: { username: e.target.value }});
-  }
+  handleChange = e => {
+    const status = e.target.status;
+    this.setState({ [status]: e.target.value });
+  };
 
-  createUser() {
-    const newUser = this.state.newUser;
-    const headers = { 'Content-Type': 'application/json' };
-    fetch('/api/users', { method: 'POST', body: JSON.stringify(newUser), headers })
-      .then((res) => {
-        return fetch('/api/users')
-          .then((res) => { return res.json(); })
-          .then((body) => { this.setState({ users: body }); });
-      });
-  }
+  delete = task => {
+    const cards = this.state.cards.filter(card => task !== card.task);
+    this.setState({ cards });
+  };
+
+  // edit = task => {
+  //   const cards = this.state.cards.filter(card => task === card.task);
+  //   this.setState({ cards });
+  // }
+
 
   render() {
+    const { cards } = this.state;
+
+
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
+      <div className="kanban">
 
-          <div>
-            { this.state.smoke ? this.state.smoke : '' }
-          </div>
+        <div>
+          <h1>To-Dos</h1>
+          {cards
+            .filter(x => x.status === 'TO-DO')
+            .map(y => (
+              <Card status={y.status} task={y.task} />
+            ))}
+        </div>
+        <div>
+          <h1>DOING</h1>
+          {cards
+            .filter(x => x.status === 'DOING')
+            .map(y => (
+              <Card status={y.status} task={y.task} />
+            ))}
+        </div>
+        <div>
+          <h1>DONE</h1>
+          {cards
+            .filter(x => x.status === 'DONE')
+            .map(y => (
+              <Card status={y.status} task={y.task} />
+            ))}
+        </div>
 
-          <div>
-            {
-              this.state.users.map((user) => {
-                return (
-                  <div>
-                    { user.username }
-                  </div>
-                );
-              })
-            }
-          </div>
+        <form onSubmit={this.handleSubmit}>
+          <input name="task" onChange={this.handleChange} type="text" />
+          <input name="status" onChange={this.handleChange} type="text" />
+          <input type="submit" />
+        </form>
 
-          <div>
-            <label> Create new User: </label>
-            <input type="text" value={this.state.newUser.username} onChange={this.updateUser}/>
-            <button onClick={this.createUser}>Create User</button>
-          </div>
+        {cards.map(card => (
+          <Card
+            task={card.task}
+            status={card.status}
+            delete={this.delete}
+            edit={this.edit}
+          />
 
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
+        ))}
 
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
       </div>
     );
   }
+}
+
+function Card(props) {
+  return (
+    <div>
+      <h2>TASK: {props.task}</h2>
+      <h2>STATUS: {props.status}</h2>
+      <button onClick={() => props.delete(props.task)}>Remove</button>
+      <button onClick={() => props.edit(props.task)}>Edit</button>
+    </div>
+  );
 }
 
 export default App;
