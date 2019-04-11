@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 
-router.route('/users')
+router.route('/')
   .get((req, res) => {
     return new req.database.User().fetchAll()
       .then((users) => {
@@ -17,7 +17,7 @@ router.route('/users')
     console.log("reqbody---------------------------------->", req.body)
     return new req.database.User(req.body).save()
       .then((user) => {
-        return res.json({ success: true });
+        return res.redirect('/')
       })
       .catch((err) => {
         console.log(err);

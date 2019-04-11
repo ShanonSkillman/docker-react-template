@@ -23,8 +23,8 @@ app.use(bodyParser.json());
 app.use(decorator);
 
 // routes
-app.use('/api', userRoutes);
-app.use('/api', cardRoutes);
+app.use('/kanban', userRoutes);
+app.use('/kanban', cardRoutes);
 app.get('/api/smoke', (req, res) => {
   res.json({ smoke: 'test' });
 });

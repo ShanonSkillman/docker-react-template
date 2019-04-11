@@ -18,7 +18,7 @@ class App extends Component {
 
   componentDidMount = e => {
     console.log("mounted")
-    fetch("/api/cards")
+    fetch("/kanban")
       .then(response => {
         return response.json();
       })
@@ -29,16 +29,37 @@ class App extends Component {
   }
 
   handleSubmit = e => {
+    console.log("submitted status", this.state.status)
+    console.log("submitted task", this.state.task)
     e.preventDefault();
     const cards = this.state.cards;
     cards.push({ task: this.state.task, status: this.state.status });
     this.setState({ cards });
+    console.log('cards', cards)
   };
 
   handleChange = e => {
-    const status = e.target.status;
-    this.setState({ [status]: e.target.value });
+    const name = e.target.name;
+    this.setState({ [name]: e.target.value },
+      function () {
+        console.log('this.state after handlechange', this.state)
+
+      });
   };
+
+  submittedCard() {
+    const cardData = {
+      task: this.state.task,
+      status: this.state.status
+    }
+    const headers = { 'Content-Type': 'application/json' };
+    fetch('/api/cards', { method: 'POST', body: JSON.stringify(cardData), headers })
+      .then((res) => {
+        return fetch('/api/cards')
+          .then((res) => { return res.json(); })
+          .then((body) => { this.setState({ cards: body }) })
+      })
+  }
 
   delete = task => {
     const cards = this.state.cards.filter(card => task !== card.task);
@@ -57,47 +78,45 @@ class App extends Component {
 
     return (
       <div className="kanban">
-
-        <div>
-          <h1>To-Dos</h1>
-          {cards
-            .filter(x => x.status === 'TO-DO')
-            .map(y => (
-              <Card status={y.status} task={y.task} />
-            ))}
-        </div>
-        <div>
-          <h1>DOING</h1>
-          {cards
-            .filter(x => x.status === 'DOING')
-            .map(y => (
-              <Card status={y.status} task={y.task} />
-            ))}
-        </div>
-        <div>
-          <h1>DONE</h1>
-          {cards
-            .filter(x => x.status === 'DONE')
-            .map(y => (
-              <Card status={y.status} task={y.task} />
-            ))}
-        </div>
-
-        <form onSubmit={this.handleSubmit}>
+        <form action="/kanban" method="post">
           <input name="task" onChange={this.handleChange} type="text" />
           <input name="status" onChange={this.handleChange} type="text" />
           <input type="submit" />
         </form>
 
-        {cards.map(card => (
-          <Card
-            task={card.task}
-            status={card.status}
-            delete={this.delete}
-            edit={this.edit}
-          />
-
-        ))}
+        <div>
+          <div className="column"><h1>To-Dos</h1>
+            {cards
+              .filter(x => x.status === 'TO-DO')
+              .map(y => (
+                <Card status={y.status}
+                  task={y.task}
+                  delete={this.delete} />
+              ))}
+          </div>
+        </div>
+        <div>
+          <div className="column"><h1>DOING</h1>
+            {cards
+              .filter(x => x.status === 'DOING')
+              .map(y => (
+                <Card status={y.status}
+                  task={y.task}
+                  delete={this.delete} />
+              ))}
+          </div>
+        </div>
+        <div>
+          <div className="column"><h1>DONE</h1>
+            {cards
+              .filter(x => x.status === 'DONE')
+              .map(y => (
+                <Card status={y.status}
+                  task={y.task}
+                  delete={this.delete} />
+              ))}
+          </div>
+        </div>
 
       </div>
     );
@@ -106,7 +125,7 @@ class App extends Component {
 
 function Card(props) {
   return (
-    <div>
+    <div className="card">
       <h2>TASK: {props.task}</h2>
       <h2>STATUS: {props.status}</h2>
       <button onClick={() => props.delete(props.task)}>Remove</button>
