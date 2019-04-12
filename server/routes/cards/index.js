@@ -28,7 +28,7 @@ router.route('/')
     })
     //DELETES A NEW CARD THROUGH API & DELETE METHOD TO DATABASE//
     .delete((req, res) => {
-        let id = req.body.id;
+        let id = req.body.chosen
         console.log("reqbody CHOSENNNNNN ID---------------------------------->", id)
         return new req.database.Card({ id })
             .where({ id })
