@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 
-router.route('/')
+router.route('/users')
   .get((req, res) => {
     return new req.database.User().fetchAll()
       .then((users) => {

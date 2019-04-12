@@ -16,34 +16,36 @@ class App extends Component {
     };
   }
 
+
+
+  //DISPLAY CARDS DATA & MOUNT FOR CLIENT IN BROWSER//
   componentDidMount = e => {
-    console.log("mounted")
+
     fetch("/kanban")
       .then(response => {
-        return response.json();
+        return response.json()
       })
       .then(cardsData => {
         this.setState({ cards: cardsData })
-        console.log(JSON.stringify(cardsData))
       })
   }
 
+  //THIS SUBMITS & ADDS CARD TASK/STATUS CONNECTED TO FORM & POSTS BROWSER & DATABASE//
   handleSubmit = e => {
-    console.log("submitted status", this.state.status)
-    console.log("submitted task", this.state.task)
+    // console.log("submitted status", this.state.status)
+    // console.log("submitted task", this.state.task)
     e.preventDefault();
     const cards = this.state.cards;
     cards.push({ task: this.state.task, status: this.state.status });
     this.setState({ cards });
-    console.log('cards', cards)
+    // console.log('cards', cards)
   };
 
   handleChange = e => {
     const name = e.target.name;
     this.setState({ [name]: e.target.value },
       function () {
-        console.log('this.state after handlechange', this.state)
-
+        // console.log('this.state after handlechange', this.state)
       });
   };
 
@@ -53,18 +55,44 @@ class App extends Component {
       status: this.state.status
     }
     const headers = { 'Content-Type': 'application/json' };
-    fetch('/api/cards', { method: 'POST', body: JSON.stringify(cardData), headers })
+    fetch('/kanban', { method: 'POST', body: JSON.stringify(cardData), headers })
       .then((res) => {
-        return fetch('/api/cards')
-          .then((res) => { return res.json(); })
+        return fetch('/kanban')
+          .then((res) => { return res.json() })
           .then((body) => { this.setState({ cards: body }) })
       })
   }
 
-  delete = task => {
-    const cards = this.state.cards.filter(card => task !== card.task);
-    this.setState({ cards });
-  };
+  removedCard = id => {
+    const headers = { 'Content-Type': 'application/json' };
+    let cardData = { chosen: id };
+    console.log("THIS IS THE CARD DATA", cardData)
+    fetch(`/kanban`, { method: 'DELETE', body: JSON.stringify(cardData), headers })
+      .then(res => {
+        return fetch('/kanban')
+          .then((res) => { return res.json() })
+          .then((body) => { this.setState({ cards: body }) })
+      })
+  }
+
+
+  // //THIS ALLOWS CLIENT TO DELETE CARDS VIA BROWSER//
+  // delete = task => {
+  //   const cards = this.state.cards.filter(card => task !== card.task);
+  //   this.setState({ cards });
+  //   const headers = { 'Content-Type': 'application/json' };
+  //   fetch('/kanban', { method: 'DELETE', body: JSON.stringify(cards), headers })
+  //     .then(res => {
+  //       return fetch('/kanban')
+  //         .then((res) => { return res.json() })
+  //         .then((body) => { this.setState({ cards: body }) })
+  //     })
+  // };
+
+  // delete = task => {
+  //   const cards = this.state.cards.filter(card => task !== card.task);
+  //   this.setState({ cards });
+  // }
 
   // edit = task => {
   //   const cards = this.state.cards.filter(card => task === card.task);
@@ -77,8 +105,9 @@ class App extends Component {
 
 
     return (
+
       <div className="kanban">
-        <form action="/kanban" method="post">
+        <form action="/kanban" method='POST'>
           <input name="task" onChange={this.handleChange} type="text" />
           <input name="status" onChange={this.handleChange} type="text" />
           <input type="submit" />
@@ -91,7 +120,8 @@ class App extends Component {
               .map(y => (
                 <Card status={y.status}
                   task={y.task}
-                  delete={this.delete} />
+                  id={y.id}
+                  delete={this.removedCard} />
               ))}
           </div>
         </div>
@@ -102,7 +132,8 @@ class App extends Component {
               .map(y => (
                 <Card status={y.status}
                   task={y.task}
-                  delete={this.delete} />
+                  id={y.id}
+                  delete={this.removedCard} />
               ))}
           </div>
         </div>
@@ -113,7 +144,8 @@ class App extends Component {
               .map(y => (
                 <Card status={y.status}
                   task={y.task}
-                  delete={this.delete} />
+                  id={y.id}
+                  delete={this.removedCard} />
               ))}
           </div>
         </div>
@@ -124,11 +156,13 @@ class App extends Component {
 }
 
 function Card(props) {
+
+
   return (
     <div className="card">
       <h2>TASK: {props.task}</h2>
       <h2>STATUS: {props.status}</h2>
-      <button onClick={() => props.delete(props.task)}>Remove</button>
+      <button onClick={() => props.delete(props.id)}>Remove</button>
       <button onClick={() => props.edit(props.task)}>Edit</button>
     </div>
   );
