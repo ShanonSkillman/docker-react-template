@@ -63,10 +63,11 @@ class App extends Component {
       })
   }
 
+  //THIS ALLOWS CLIENT TO DELETE CARDS VIA BROWSER//
   removedCard = id => {
     const headers = { 'Content-Type': 'application/json' };
     let cardData = { chosen: id };
-    console.log("THIS IS THE CARD DATA", cardData)
+    // console.log("THIS IS THE CARD DATA", cardData)
     fetch(`/kanban`, { method: 'DELETE', body: JSON.stringify(cardData), headers })
       .then(res => {
         return fetch('/kanban')
@@ -75,20 +76,37 @@ class App extends Component {
       })
   }
 
+  editedCard = id => {
+    const headers = { 'Content-Type': 'application/json' };
+    let cardData = { chosen: id };
+    console.log("-------->THIS IS THE CARD DATA SELECTED TO BE EDITED")
+    fetch(`/kanban`, { method: 'POST', body: JSON.stringify(cardData), headers })
+      .then(res => {
+        return fetch('/kanban')
+          .then((res) => { return res.json() })
+          .then((body) => { this.setState({ cards: body }) })
+      })
+  }
 
-  // //THIS ALLOWS CLIENT TO DELETE CARDS VIA BROWSER//
-  // delete = task => {
-  //   const cards = this.state.cards.filter(card => task !== card.task);
-  //   this.setState({ cards });
+  //THIS WILL HOPEFULLY ALLOW EDIT TO WORK THROUGH THE BROWSER//
+  // handleUpdate = cards => {
+  //   let editCard = { chosen: id };
   //   const headers = { 'Content-Type': 'application/json' };
-  //   fetch('/kanban', { method: 'DELETE', body: JSON.stringify(cards), headers })
+  //   fetch(`/kanban`, { method: 'PUT', body: JSON.stringify(editCard), headers })
   //     .then(res => {
-  //       return fetch('/kanban')
-  //         .then((res) => { return res.json() })
-  //         .then((body) => { this.setState({ cards: body }) })
+  //       this.updateCards(cards)
   //     })
-  // };
+  // }
 
+  // updateCards = cards => {
+  //   let newEditCard = this.state.cards.filter((f) => f.id !== cards.id)
+  //   newCards.push(cards)
+  //   this.setState({
+  //     cards: newCards
+  //   })
+  // }
+
+  //This was allowing delete through the browser, but was not connected to the database//
   // delete = task => {
   //   const cards = this.state.cards.filter(card => task !== card.task);
   //   this.setState({ cards });
@@ -121,7 +139,8 @@ class App extends Component {
                 <Card status={y.status}
                   task={y.task}
                   id={y.id}
-                  delete={this.removedCard} />
+                  delete={this.removedCard}
+                  edit={this.editedCard} />
               ))}
           </div>
         </div>
@@ -133,7 +152,8 @@ class App extends Component {
                 <Card status={y.status}
                   task={y.task}
                   id={y.id}
-                  delete={this.removedCard} />
+                  delete={this.removedCard}
+                  edit={this.editedCard} />
               ))}
           </div>
         </div>
@@ -145,7 +165,8 @@ class App extends Component {
                 <Card status={y.status}
                   task={y.task}
                   id={y.id}
-                  delete={this.removedCard} />
+                  delete={this.removedCard}
+                  edit={this.editedCard} />
               ))}
           </div>
         </div>
@@ -163,7 +184,7 @@ function Card(props) {
       <h2>TASK: {props.task}</h2>
       <h2>STATUS: {props.status}</h2>
       <button onClick={() => props.delete(props.id)}>Remove</button>
-      <button onClick={() => props.edit(props.task)}>Edit</button>
+      <button onClick={() => props.edit(props.id)}>Edit</button>
     </div>
   );
 }
