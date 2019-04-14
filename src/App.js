@@ -1,15 +1,21 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { getAllTasks } from './actions/actions.js'
+
+
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+
+import { connect } from 'react-redux';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       cards: [
-        { task: 'BUY FOOD', status: 'DONE' },
-        { task: 'CHEF UP YUMMY GRINDS', status: 'DOING' },
-        { task: 'ENJOY THEM TASTY GRINDS', status: 'TO-DO' },
+        // { task: 'BUY FOOD', status: 'DONE' },
+        // { task: 'CHEF UP YUMMY GRINDS', status: 'DOING' },
+        // { task: 'ENJOY THEM TASTY GRINDS', status: 'TO-DO' },
       ],
       task: '',
       status: ''
@@ -20,15 +26,17 @@ class App extends Component {
 
   //DISPLAY CARDS DATA & MOUNT FOR CLIENT IN BROWSER//
   componentDidMount = e => {
-
-    fetch("/kanban")
-      .then(response => {
-        return response.json()
-      })
-      .then(cardsData => {
-        this.setState({ cards: cardsData })
-      })
+    // fetch("/kanban")
+    //   .then(response => {
+    //     return response.json()
+    //   })
+    //   .then(cardsData => {
+    //     this.setState({ cards: cardsData })
+    //   })
+    this.props.getAllTasks()
   }
+
+
 
   //THIS SUBMITS & ADDS CARD TASK/STATUS CONNECTED TO FORM & POSTS BROWSER & DATABASE//
   handleSubmit = e => {
@@ -119,7 +127,8 @@ class App extends Component {
 
 
   render() {
-    const { cards } = this.state;
+    const { cards } = this.props;
+    console.log("THIS.PROPS APP.js", this.props.cards)
 
 
     return (
@@ -135,8 +144,10 @@ class App extends Component {
           <div className="column"><h1>To-Dos</h1>
             {cards
               .filter(x => x.status === 'TO-DO')
-              .map(y => (
-                <Card status={y.status}
+              .map((y, i) => (
+                <Card
+                  key={i}
+                  status={y.status}
                   task={y.task}
                   id={y.id}
                   delete={this.removedCard}
@@ -148,8 +159,10 @@ class App extends Component {
           <div className="column"><h1>DOING</h1>
             {cards
               .filter(x => x.status === 'DOING')
-              .map(y => (
-                <Card status={y.status}
+              .map((y, i) => (
+                <Card
+                  key={i}
+                  status={y.status}
                   task={y.task}
                   id={y.id}
                   delete={this.removedCard}
@@ -161,8 +174,10 @@ class App extends Component {
           <div className="column"><h1>DONE</h1>
             {cards
               .filter(x => x.status === 'DONE')
-              .map(y => (
-                <Card status={y.status}
+              .map((y, i) => (
+                <Card
+                  key={i}
+                  status={y.status}
                   task={y.task}
                   id={y.id}
                   delete={this.removedCard}
@@ -189,4 +204,8 @@ function Card(props) {
   );
 }
 
-export default App;
+const mapStateToProps = storeState => ({ cards: storeState })
+
+const ConnectedApp = connect(mapStateToProps, { getAllTasks })(App);
+
+export default ConnectedApp;
