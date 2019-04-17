@@ -2,6 +2,7 @@ import axios from 'axios';
 // export const ADD_TASK = 'ADD_ITEM';
 export const GET_ALL_TASKS = 'GET_ALL_TASKS';
 export const ADD_TASK = 'ADD_TASK';
+export const DELETE_TASK = 'DELETE_TASK'
 
 // export function addTask(task) {
 //     return dispatch => {
@@ -31,11 +32,25 @@ export const addTasks = (task) => {
     return dispatch => {
         axios.post('/kanban', task)
             .then(response => {
-                console.log('response', response.data)
+                console.log('response in addTask', response.data)
                 dispatch({ type: GET_ALL_TASKS, payload: response.data })
             })
             .catch(err => {
                 console.log('err in addTASKS action axios call', err)
+            })
+    }
+}
+
+export const deleteTask = (task) => {
+    console.log('ACTION: deleteTask', task)
+    return dispatch => {
+        axios.delete('/kanban', task)
+            .then(response => {
+                console.log('response in deleteTask', response.data)
+                dispatch({ type: GET_ALL_TASKS, payload: response.data })
+            })
+            .catch(err => {
+                console.log('err in deleteTask action axios call', err)
             })
     }
 }

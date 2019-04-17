@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { getAllTasks } from './actions/actions.js'
+import { getAllTasks, addTasks, deleteTask } from './actions/actions.js'
 
 
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
@@ -33,6 +33,7 @@ class App extends Component {
     //   .then(cardsData => {
     //     this.setState({ cards: cardsData })
     //   })
+    console.log(this.props, "THISPROPS")
     this.props.getAllTasks()
   }
 
@@ -57,43 +58,54 @@ class App extends Component {
       });
   };
 
-  submittedCard() {
-    const cardData = {
+  submittedCard = (e) => {
+    e.preventDefault()
+    const taskData = {
       task: this.state.task,
       status: this.state.status
     }
-    const headers = { 'Content-Type': 'application/json' };
-    fetch('/kanban', { method: 'POST', body: JSON.stringify(cardData), headers })
-      .then((res) => {
-        return fetch('/kanban')
-          .then((res) => { return res.json() })
-          .then((body) => { this.setState({ cards: body }) })
-      })
+    this.props.addTasks(taskData)
+    // const headers = { 'Content-Type': 'application/json' };
+    // fetch('/kanban', { method: 'POST', body: JSON.stringify(taskData), headers })
+    //   .then((res) => {
+    //     return fetch('/kanban')
+    //       .then((res) => { return res.json() })
+    //       .then((body) => { this.setState({ cards: body }) })
+    //   })
+  }
+
+  deletedCard = (e) => {
+    e.preventDefault()
+    const taskData = {
+      task: this.state.task,
+      status: this.state.status
+    }
+    this.props.deleteTask(taskData)
   }
 
   //THIS ALLOWS CLIENT TO DELETE CARDS VIA BROWSER//
-  removedCard = id => {
-    const headers = { 'Content-Type': 'application/json' };
-    let cardData = { chosen: id };
-    // console.log("THIS IS THE CARD DATA", cardData)
-    fetch(`/kanban`, { method: 'DELETE', body: JSON.stringify(cardData), headers })
-      .then(res => {
-        return fetch('/kanban')
-          .then((res) => { return res.json() })
-          .then((body) => { this.setState({ cards: body }) })
-      })
-  }
+  // removedCard = id => {
+  //   const headers = { 'Content-Type': 'application/json' };
+  //   let cardData = { chosen: id };
+  //   // console.log("THIS IS THE CARD DATA", cardData)
+  //   fetch(`/kanban`, { method: 'DELETE', body: JSON.stringify(cardData), headers })
+  //     .then(res => {
+  //       return fetch('/kanban')
+  //         .then((res) => { return res.json() })
+  //         .then((body) => { this.setState({ cards: body }) })
+  //     })
+  // }
 
   editedCard = id => {
-    const headers = { 'Content-Type': 'application/json' };
-    let cardData = { chosen: id };
-    console.log("-------->THIS IS THE CARD DATA SELECTED TO BE EDITED")
-    fetch(`/kanban`, { method: 'POST', body: JSON.stringify(cardData), headers })
-      .then(res => {
-        return fetch('/kanban')
-          .then((res) => { return res.json() })
-          .then((body) => { this.setState({ cards: body }) })
-      })
+    // const headers = { 'Content-Type': 'application/json' };
+    // let cardData = { chosen: id };
+    // console.log("-------->THIS IS THE CARD DATA SELECTED TO BE EDITED")
+    // fetch(`/kanban`, { method: 'POST', body: JSON.stringify(cardData), headers })
+    //   .then(res => {
+    //     return fetch('/kanban')
+    //       .then((res) => { return res.json() })
+    //       .then((body) => { this.setState({ cards: body }) })
+    //   })
   }
 
   //THIS WILL HOPEFULLY ALLOW EDIT TO WORK THROUGH THE BROWSER//
@@ -134,7 +146,7 @@ class App extends Component {
     return (
 
       <div className="kanban">
-        <form action="/kanban" method='POST'>
+        <form onSubmit={this.submittedCard}>
           <input name="task" onChange={this.handleChange} type="text" />
           <input name="status" onChange={this.handleChange} type="text" />
           <input type="submit" />
@@ -150,7 +162,7 @@ class App extends Component {
                   status={y.status}
                   task={y.task}
                   id={y.id}
-                  delete={this.removedCard}
+                  delete={this.deletedCard}
                   edit={this.editedCard} />
               ))}
           </div>
@@ -165,7 +177,7 @@ class App extends Component {
                   status={y.status}
                   task={y.task}
                   id={y.id}
-                  delete={this.removedCard}
+                  delete={this.deletedCard}
                   edit={this.editedCard} />
               ))}
           </div>
@@ -180,7 +192,7 @@ class App extends Component {
                   status={y.status}
                   task={y.task}
                   id={y.id}
-                  delete={this.removedCard}
+                  delete={this.deletedCard}
                   edit={this.editedCard} />
               ))}
           </div>
@@ -198,14 +210,18 @@ function Card(props) {
     <div className="card">
       <h2>TASK: {props.task}</h2>
       <h2>STATUS: {props.status}</h2>
-      <button onClick={() => props.delete(props.id)}>Remove</button>
+      <form onSubmit={this.submittedCard}></form>
+      {/* <button
+        onClick={() => this.props.dispatch({ type: 'DELETE_TASK', id: this.props.post.id })}> */}
+      {/* Delete</button> */}
+      <button onClick={this.deletedCard}>Remove</button>
       <button onClick={() => props.edit(props.id)}>Edit</button>
-    </div>
+    </div >
   );
 }
 
 const mapStateToProps = storeState => ({ cards: storeState })
 
-const ConnectedApp = connect(mapStateToProps, { getAllTasks })(App);
+const ConnectedApp = connect(mapStateToProps, { getAllTasks, addTasks, deleteTask })(App);
 
 export default ConnectedApp;
